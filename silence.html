@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the eleven recorded instances of the defect it exists to prevent. Nine fixed, one accepted, one open.">
+<meta name="description" content="The rule every heibench tool follows, and the twelve recorded instances of the defect it exists to prevent. Nine fixed, one accepted, two open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -53,9 +53,9 @@
 
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
-  has been recorded <strong>eleven times</strong>, across <strong>five unrelated
+  has been recorded <strong>twelve times</strong>, across <strong>five unrelated
   domains</strong>, written at different times by the same author. <strong>Nine are
-  fixed, one is accepted, one is open.</strong></p>
+  fixed, one is accepted, two are open.</strong></p>
 
   <p><strong>Three states, because two could not carry the answer.</strong>
   <span class="tag open">open</span> means nobody has fixed it yet.
@@ -93,6 +93,7 @@
       <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>10</td><td>gerberdiff — an unmodelled trace reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>11</td><td>prusaslicer-py — unusable engine reported as a code failure</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>12</td><td>prusaslicer-py — a preamble line returned as the version</td><td>drive</td><td><span class="tag open">open</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -355,6 +356,34 @@ error: mkdirat(.var): Permission denied         # exit 1</code></pre>
     form of this defect, not the definition of it. What the record tracks is the state a
     caller <strong>cannot distinguish</strong>, and the third outcome having no channel
     is the same defect whichever neighbouring answer it collapses into.</p>
+  </div>
+
+  <div class="case">
+    <h3>12. A build that greets you before it identifies itself reports the greeting
+      as its version <span class="tag open">open</span></h3>
+    <p class="meta">prusaslicer-py &middot; <code>prusaslicer_py/slicer.py:210</code>
+      &middot;
+      <a href="https://github.com/heibench/prusaslicer-py/issues/34">prusaslicer-py#34</a>
+      &middot; reproduced 2026-09-06</p>
+    <p>PrusaSlicer has no <code>--version</code> flag &mdash; 2.9.6 answers
+    <code>Unknown option --version</code> and exits <code>1</code> &mdash; so the version
+    is read from the first line of <code>--help</code>. The native Windows console build
+    prints a preamble first:</p>
+<pre><code>System OpenGL library successfully released
+PrusaSlicer-2.9.6 based on Slic3r (with GUI support)</code></pre>
+    <p><code>check_version()</code> returns <code>"System OpenGL library successfully
+    released"</code>, at exit <code>0</code>, as the version. Reproduced against a stub
+    printing those two lines.</p>
+    <p>The Linux Flatpak has <em>no</em> preamble, which is why the code carries this
+    comment: <em>"the version is only ever printed as the first line of --help"</em>,
+    followed by the Flatpak's banner as the example. A claim about every build,
+    measured against one.</p>
+    <p>This one <strong>fabricates</strong> rather than misroutes, which puts it on the
+    worse side of the severity axis from case 11. The signature is
+    <code>-&gt; str</code>, so there is no third outcome available: a version it could not
+    read comes back looking exactly like one it could. Found by a sibling project's
+    four-platform engine matrix &mdash; the defect needed a second platform to become
+    visible, and neither project had one.</p>
   </div>
 
   <h2>What the record is for</h2>
