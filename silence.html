@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the ten recorded instances of the defect it exists to prevent. Nine fixed, one accepted.">
+<meta name="description" content="The rule every heibench tool follows, and the twelve recorded instances of the defect it exists to prevent. Nine fixed, one accepted, two open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -53,9 +53,9 @@
 
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
-  has been recorded <strong>ten times</strong>, across <strong>five unrelated
+  has been recorded <strong>twelve times</strong>, across <strong>five unrelated
   domains</strong>, written at different times by the same author. <strong>Nine are
-  fixed. One is accepted.</strong></p>
+  fixed, one is accepted, two are open.</strong></p>
 
   <p><strong>Three states, because two could not carry the answer.</strong>
   <span class="tag open">open</span> means nobody has fixed it yet.
@@ -92,6 +92,8 @@
       <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>10</td><td>gerberdiff — an unmodelled trace reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
+      <tr><td>11</td><td>prusaslicer-py — unusable engine reported as a code failure</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>12</td><td>prusaslicer-py — a preamble line returned as the version</td><td>drive</td><td><span class="tag open">open</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -318,6 +320,70 @@ linear_extrude(h) square([40,30]);</code></pre>
     <p><strong>Resolved:</strong> the engine records every operation it could not model,
     the comparison reports <code>identical | different | indeterminate</code>, and this
     case exits <code>2</code> naming the reason. Closes adjudication A3.</p>
+  </div>
+
+  <div class="case">
+    <h3>11. A PrusaSlicer that cannot start is reported as a failure of the code
+      <span class="tag open">open</span></h3>
+    <p class="meta">prusaslicer-py &middot; <code>prusaslicer_py/slicer.py</code>,
+      <code>tests/conftest.py</code> &middot;
+      <a href="https://github.com/heibench/prusaslicer-py/issues/33">prusaslicer-py#33</a>
+      &middot; reproduced 2026-09-06</p>
+    <p>Engine discovery accepts a Flatpak when <code>flatpak info</code> exits
+    <code>0</code>. That establishes the app is <em>installed</em>, not that it can
+    <em>run</em>. With an unwritable <code>HOME</code> the launcher fails before the
+    engine starts:</p>
+<pre><code>$ flatpak info com.prusa3d.PrusaSlicer          # exit 0
+$ flatpak run --command=prusa-slicer com.prusa3d.PrusaSlicer --help
+error: mkdirat(.var): Permission denied         # exit 1</code></pre>
+    <p>Discovery is unaffected, because it only ran <code>info</code>.
+    <code>PrusaSlicer()</code> constructs and reports
+    <code>engine_kind="flatpak"</code>, so <code>conftest.py</code> &mdash; which skips
+    engine tests by catching <code>FileNotFoundError</code> &mdash; does not skip.
+    Same tree: <strong>3 failed, 40 passed, 3 skipped</strong> against
+    <strong>43 passed, 3 skipped</strong> with a working <code>HOME</code>.</p>
+    <p>The machinery for this exists and does not fire. conftest's skip message reads
+    <em>"This is an environment fault, not a verdict on the code under test"</em> &mdash;
+    correct for an <em>absent</em> engine, absent for a <em>present-but-unusable</em>
+    one. Under <code>PRUSASLICER_PY_REQUIRE_ENGINE=1</code>, whose whole job is
+    asserting an engine was really exercised, the flag cannot tell "engine ran, code is
+    wrong" from "engine never started".</p>
+    <p><strong>Why this is here despite going red.</strong> It was first written up as
+    <em>not</em> a case, on the reasoning that it fabricates no success &mdash; D5's
+    artifact verification means no artifact, no green. That line is the wrong one, and
+    case 2 is why: netspec reporting <em>could not evaluate</em> as <em>the board is
+    wrong</em> also produced a red, and is case 2. Green-from-nothing is the sharpest
+    form of this defect, not the definition of it. What the record tracks is the state a
+    caller <strong>cannot distinguish</strong>, and the third outcome having no channel
+    is the same defect whichever neighbouring answer it collapses into.</p>
+  </div>
+
+  <div class="case">
+    <h3>12. A build that greets you before it identifies itself reports the greeting
+      as its version <span class="tag open">open</span></h3>
+    <p class="meta">prusaslicer-py &middot; <code>prusaslicer_py/slicer.py:210</code>
+      &middot;
+      <a href="https://github.com/heibench/prusaslicer-py/issues/34">prusaslicer-py#34</a>
+      &middot; reproduced 2026-09-06</p>
+    <p>PrusaSlicer has no <code>--version</code> flag &mdash; 2.9.6 answers
+    <code>Unknown option --version</code> and exits <code>1</code> &mdash; so the version
+    is read from the first line of <code>--help</code>. The native Windows console build
+    prints a preamble first:</p>
+<pre><code>System OpenGL library successfully released
+PrusaSlicer-2.9.6 based on Slic3r (with GUI support)</code></pre>
+    <p><code>check_version()</code> returns <code>"System OpenGL library successfully
+    released"</code>, at exit <code>0</code>, as the version. Reproduced against a stub
+    printing those two lines.</p>
+    <p>The Linux Flatpak has <em>no</em> preamble, which is why the code carries this
+    comment: <em>"the version is only ever printed as the first line of --help"</em>,
+    followed by the Flatpak's banner as the example. A claim about every build,
+    measured against one.</p>
+    <p>This one <strong>fabricates</strong> rather than misroutes, which puts it on the
+    worse side of the severity axis from case 11. The signature is
+    <code>-&gt; str</code>, so there is no third outcome available: a version it could not
+    read comes back looking exactly like one it could. Found by a sibling project's
+    four-platform engine matrix &mdash; the defect needed a second platform to become
+    visible, and neither project had one.</p>
   </div>
 
   <h2>What the record is for</h2>
