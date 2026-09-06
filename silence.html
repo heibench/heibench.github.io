@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent. Five still open.">
+<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent. Four still open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -54,7 +54,7 @@
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
   has been recorded <strong>nine times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Five are
+  domains</strong>, written at different times by the same author. <strong>Four are
   still open.</strong></p>
 
   <p>Every case here is tracked by an issue labelled
@@ -71,7 +71,7 @@
     <thead><tr><th>#</th><th>Where</th><th>Layer</th><th>Status</th></tr></thead>
     <tbody>
       <tr><td>1</td><td>gerberdiff — dropped flash reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
-      <tr><td>2</td><td>netspec — no third verdict</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>2</td><td>netspec — no third verdict</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>3</td><td>orlab — version fallback is log-only</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>5</td><td>orlab — unknown flight events dropped</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
@@ -109,10 +109,18 @@
 
   <div class="case">
     <h3>2. netspec reports "could not evaluate" as "the board is wrong"
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">netspec · <code>src/kicad_netspec/check.py:39</code> ·
       <a href="https://github.com/heibench/netspec/issues/19">netspec#19</a> ·
-      read from source 2026-09-05</p>
+      read from source 2026-09-05 · fixed in netspec 0.9.0, 2026-09-06 (D26)</p>
+    <p><strong>Resolved:</strong> <code>Verdict</code> gained <code>incomplete</code>
+    and <code>error</code>, and a skipped or unsupported rule now yields
+    <code>incomplete</code> at exit <code>2</code> instead of <code>fail</code> at exit
+    <code>1</code>. Decided together with A1, since exit <code>2</code> had to stop
+    meaning <em>usage</em> first. Note what the tests were already saying:
+    <code>test_a_part_absent_from_the_design_is_skipped_not_failed</code> asserted
+    <code>verdict == "fail"</code> — the name and the assertion contradicted each other,
+    because <code>fail</code> was the only non-green value the type offered.</p>
     <p><code>Verdict = Literal["pass", "fail"]</code>, green only when every rule is
     green — so an <code>unsupported</code> rule collapses into <code>fail</code>,
     saying the board is wrong when the truth is the tool could not check it. See

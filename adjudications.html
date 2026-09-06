@@ -65,8 +65,15 @@
 
   <div class="case">
     <h3>A1 — exit code <code>2</code> means two different things
-      <span class="tag open">open</span></h3>
-    <p class="meta">verified against source 2026-09-05</p>
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">verified against source 2026-09-05 ·
+      <a href="https://github.com/heibench/netspec/issues/20">netspec#20</a> ·
+      settled in netspec 0.9.0, 2026-09-06 (D26)</p>
+    <p><strong>Resolved:</strong> netspec adopted partspec's split —
+    <code>2</code> is <em>could not tell</em>, usage moved to <code>64</code>
+    (<code>EX_USAGE</code>). The two tools now agree on 0, 1, 2, 4 and 64. netspec
+    does not adopt partspec's <code>EMPTY = 3</code>: a contract asserting nothing is a
+    defect in the contract, and its synthetic result already says so.</p>
     <p>partspec maps <code>Verdict.INCOMPLETE</code> to exit <code>2</code>
     (<code>src/partspec/status.py:107</code>) and puts usage at <code>64</code>
     (<code>EX_USAGE</code>). netspec uses <code>EXIT_USAGE = 2</code>
@@ -78,8 +85,18 @@
 
   <div class="case">
     <h3>A2 — netspec cannot report "could not tell" at the verdict level
-      <span class="tag open">open</span></h3>
-    <p class="meta">read from source 2026-09-05, not reproduced</p>
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">read from source 2026-09-05, not reproduced ·
+      <a href="https://github.com/heibench/netspec/issues/19">netspec#19</a> ·
+      settled in netspec 0.9.0, 2026-09-06 (D26)</p>
+    <p><strong>Resolved:</strong> <code>Verdict</code> is now
+    <code>pass · fail · incomplete · error</code>. A skipped or unsupported rule yields
+    <code>incomplete</code> at exit <code>2</code>, and <code>fail</code> outranks it so
+    one unsupported rule cannot mask a real finding. Decided with A1, because exit
+    <code>2</code> had to stop meaning <em>usage</em> first. <strong>Half of D10 stays
+    open:</strong> <code>error</code> is in the vocabulary and the exit map, but nothing
+    returns it — an environment fault raises before a netlist is read, so there is no
+    report to carry the field D10 asks for.</p>
     <p><code>Verdict = Literal["pass", "fail"]</code>
     (<code>src/kicad_netspec/check.py:39</code>), green only when every rule is green —
     so an <code>unsupported</code> rule collapses into <code>fail</code>, saying the
