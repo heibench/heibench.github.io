@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent. Four still open.">
+<meta name="description" content="The rule every heibench tool follows, and the ten recorded instances of the defect it exists to prevent. Four still open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -53,7 +53,7 @@
 
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
-  has been recorded <strong>nine times</strong>, across <strong>five unrelated
+  has been recorded <strong>ten times</strong>, across <strong>five unrelated
   domains</strong>, written at different times by the same author. <strong>Four are
   still open.</strong></p>
 
@@ -79,6 +79,7 @@
       <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
+      <tr><td>10</td><td>gerberdiff — an unmodelled trace reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -254,6 +255,35 @@ linear_extrude(h) square([40,30]);</code></pre>
     nothing said on stdout, stderr or in the report, at exit <code>0</code>.</p>
     <p>The variable is presented as authoritative, not as a hint — it is what the tool's
     own error message tells you to set.</p>
+  </div>
+
+  <div class="case">
+    <h3>10. An unmodelled trace reads as no change, and the two engines disagree
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">gerberdiff v0.29.1 ·
+      <a href="https://github.com/heibench/gerberdiff/issues/25">gerberdiff#25</a> ·
+      reproduced 2026-09-06 · fixed in <code>0685cde</code>, 2026-09-06 (A3)</p>
+    <p>The geometry engine does not model a stroke drawn with a macro or block aperture.
+    That limitation was <em>documented</em> in <code>docs/geometry-diff.md</code> under
+    "Known limitations" — the output simply never said so. A board with such a trace
+    added reported <code>0 changes</code> at exit <code>0</code> under
+    <code>--fail-on-diff</code>, with the JSON byte-identical to comparing a board
+    against a copy of itself.</p>
+    <p>What makes this one different from the rest: <strong>the raster engine saw the
+    change.</strong> Same two directories, same question, opposite answers —
+    <code>diff</code> reported <code>1/1 layers changed</code> at exit <code>1</code>
+    while <code>geomdiff</code> reported nothing at exit <code>0</code>. A tool that
+    contradicts itself is at least detectable; the danger was that only the quieter
+    answer gated CI.</p>
+    <p>The pattern generalises past this one call site. The same bare <code>return</code>
+    appeared five times in the emit path, one of them commented
+    <em>"matches renderer: silently skip over-deep nesting"</em> — the silence was
+    deliberate, consistent, and reviewed. <strong>Documenting a limitation is not the
+    same as reporting it</strong>, and a known gap that the output cannot express is
+    indistinguishable, at the point of use, from no gap at all.</p>
+    <p><strong>Resolved:</strong> the engine records every operation it could not model,
+    the comparison reports <code>identical | different | indeterminate</code>, and this
+    case exits <code>2</code> naming the reason. Closes adjudication A3.</p>
   </div>
 
   <h2>What the record is for</h2>

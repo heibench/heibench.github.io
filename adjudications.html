@@ -108,7 +108,7 @@
 
   <div class="case">
     <h3>A3 — gerberdiff has no third state
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">reproduced 2026-09-05, v0.29.1 ·
       <a href="https://github.com/heibench/gerberdiff/issues/17">gerberdiff#17</a></p>
     <p><code>has_changes: boolean</code> (<code>docs/schema.md</code>), layer status
@@ -118,12 +118,20 @@
     <strong>resolved</strong> — gerberdiff#17 was fixed in <code>d71f6ce</code>
     (2026-09-06), so an undefined aperture is an <code>Error</code> and exits
     <code>2</code> rather than dropping the flash in silence.</p>
-    <p><strong>A3 itself stays open.</strong> That fix closed one instance; it did not
-    give the differ a third state. <code>has_changes</code> is still
-    <code>boolean</code> and layer status is still
-    <code>matched | added | removed</code>, so a comparison that could not be made is
-    still not expressible in the report. Fixing an instance is not the same as closing
-    the adjudication, and conflating the two is how the record drifts.</p>
+    <p><strong>Resolved 2026-09-06</strong> in <code>0685cde</code>. The differ now has
+    its third state: a comparison reports
+    <code>identical | different | indeterminate</code>, and every operation the geometry
+    engine could not model is counted in <code>summary.unrepresented</code> and named on
+    stderr. <code>different</code> outranks <code>indeterminate</code>, so one
+    unmodellable stroke cannot mask a trace that moved. gerberdiff's exit codes now match
+    partspec and netspec — <code>0 · 1 · 2 · 4 · 64</code> — which was the other half of
+    A1 and left gerberdiff the last member out of step.</p>
+    <p>The instance that motivated it is
+    <a href="/silence.html">case 10</a>: a trace stroked with a macro aperture read as
+    <em>no change</em> at exit <code>0</code> while the raster engine reported it. Note
+    the shape — <code>has_changes</code> was a boolean, so it was <code>false</code> for
+    two identical boards <em>and</em> for a board whose geometry could not be modelled.
+    Two verdicts could not carry three answers, exactly as in A2.</p>
   </div>
 
   <div class="case">
