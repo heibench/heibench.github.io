@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the ten recorded instances of the defect it exists to prevent. Four still open.">
+<meta name="description" content="The rule every heibench tool follows, and the ten recorded instances of the defect it exists to prevent. Two still open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -54,7 +54,7 @@
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
   has been recorded <strong>ten times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Four are
+  domains</strong>, written at different times by the same author. <strong>Two are
   still open.</strong></p>
 
   <p>Every case here is tracked by an issue labelled
@@ -75,9 +75,9 @@
       <tr><td>3</td><td>orlab — version fallback is log-only</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>5</td><td>orlab — unknown flight events dropped</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
-      <tr><td>6</td><td>partspec — tool fault emitted as part fault</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>6</td><td>partspec — tool fault emitted as part fault</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag open">open</span></td></tr>
-      <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>10</td><td>gerberdiff — an unmodelled trace reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
     </tbody>
@@ -191,9 +191,15 @@
 
   <div class="case">
     <h3>6. A partspec tool fault is emitted as a fault in the part
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">partspec ·
-      <a href="https://github.com/heibench/partspec/issues/371">partspec#371</a></p>
+      <a href="https://github.com/heibench/partspec/issues/371">partspec#371</a> ·
+      fixed in <code>e5061f2</code>, 2026-09-06</p>
+    <p><strong>Resolved:</strong> a <code>refused_by</code> block maps each refused name
+    to <code>"part"</code> or <code>"tool"</code>, and a <code>"tool"</code> refusal now
+    exits <code>4</code>. Both halves were needed: a discriminator alone lets a consumer
+    branch while the default answer still reads as success. The payload is still emitted
+    in full, so one raising backend still costs one name and not the other thirteen.</p>
     <p>When a measurement backend raises, the name lands in <code>refused</code> with a
     reason — but the reason is prose, and it is the <strong>only</strong> signal
     distinguishing a partspec bug from a defect in the part.
@@ -230,9 +236,18 @@ linear_extrude(h) square([40,30]);</code></pre>
 
   <div class="case">
     <h3>8. partspec measures and draws a part whose data file is absent
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">partspec · both pinned engines ·
-      <a href="https://github.com/heibench/partspec/issues/355">partspec#355</a></p>
+      <a href="https://github.com/heibench/partspec/issues/355">partspec#355</a> ·
+      fixed in <code>947d0b7</code>, 2026-09-06</p>
+    <p><strong>Resolved:</strong> all three verbs now refuse on one shared answer. Worth
+    recording what the fix nearly got wrong: the issue's own "smallest fix" — refuse when
+    the depfile lists anything missing — <em>refuses a correct part</em>. OpenSCAD
+    evaluates a <code>%</code> subtree, so an absent file inside one reaches that field
+    exactly as a real dependency does. Measured before writing anything:
+    <code>%import("gone.stl")</code> and <code>import("gone.stl")</code> produce identical
+    evidence and both measure 7200.0, and only the second is a fault. The narrowing moved
+    into the shared answer, so the three verbs cannot diverge on it either.</p>
     <p><code>check</code> refuses a build whose depfile names a data file that is not on
     disk. <code>measure</code> and <code>render</code> do not ask that question:
     against a part importing a missing STL, <code>check</code> exits <code>4</code>
