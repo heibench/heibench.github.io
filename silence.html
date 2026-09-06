@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent. Six still open.">
+<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent. Five still open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -54,7 +54,7 @@
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
   has been recorded <strong>nine times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Six are
+  domains</strong>, written at different times by the same author. <strong>Five are
   still open.</strong></p>
 
   <p>Every case here is tracked by an issue labelled
@@ -74,7 +74,7 @@
       <tr><td>2</td><td>netspec — no third verdict</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>3</td><td>orlab — version fallback is log-only</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag open">open</span></td></tr>
-      <tr><td>5</td><td>orlab — unknown flight events dropped</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>5</td><td>orlab — unknown flight events dropped</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>6</td><td>partspec — tool fault emitted as part fault</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag open">open</span></td></tr>
@@ -159,9 +159,15 @@
 
   <div class="case">
     <h3>5. orlab drops unknown flight events, and the result looks complete
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">orlab · <code>src/orlab/core/helper.py:195-203</code> ·
-      <a href="https://github.com/heibench/orlab/issues/63">orlab#63</a></p>
+      <a href="https://github.com/heibench/orlab/issues/63">orlab#63</a> ·
+      fixed in <code>96a0c92</code>, 2026-09-06</p>
+    <p><strong>Resolved:</strong> <code>get_events</code> returns an
+    <code>EventTimes</code> mapping carrying <code>unknown_event_types</code>, so a
+    caller can tell "no such event in this simulation" from "orlab could not interpret
+    it". It subclasses <code>dict</code>, so existing callers are unaffected. The log
+    line remains -- the point is that the log can be silenced and the field cannot.</p>
     <p><code>Helper.get_events</code> drops flight-event types orlab's enum does not
     know and tells the caller only through a log line. The returned dict then looks
     complete: a caller iterating it cannot tell "this simulation had no such event"
