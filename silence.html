@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Silence must never read as success — heibench</title>
+<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <img src="/assets/favicon.svg" alt="">
+    <a class="home" href="/">heibench</a>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/silence.html" aria-current="page">The rule</a>
+      <a href="/adjudications.html">Adjudications</a>
+      <a href="https://github.com/heibench">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h1>Silence must never read as success</h1>
+  <p class="tagline">The rule everything else follows from — and the record of how
+  often it is broken.</p>
+
+  <blockquote>
+    <p>A check that could not run, could not reach its evidence, or could not decide
+    must never be reportable as one that looked and found nothing.</p>
+  </blockquote>
+
+  <p class="lead">This is the enabling condition, not a quality preference. A person
+  catches a bad render by glancing at it; a script does not glance, and neither does
+  an agent. Strip out the human who would have noticed, and the tool's own honesty is
+  the only thing left holding the result up.</p>
+
+  <p>That is the whole reason this org can exist at all — so it is the first rule, and
+  it binds drivers as hard as it binds checkers. A driver that swallows an engine
+  error and returns a truncated artifact poisons the loop upstream of every check
+  that would have caught it. The rule itself, and the discipline that follows from
+  it, live in
+  <a href="https://github.com/heibench/.github/blob/main/AGENTS.md">AGENTS.md</a> §2.
+  This page is the evidence.</p>
+
+  <h2>How often it is violated is the point</h2>
+
+  <p>As of 2026-09-05 this exact defect — no state for <em>could not tell</em>,
+  defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
+  has been recorded <strong>nine times</strong>, across <strong>five unrelated
+  domains</strong>, written at different times by the same author. <strong>Eight are
+  still open.</strong></p>
+
+  <p>Nobody set out to build any of them that way. Assume you are doing it too.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>#</th><th>Where</th><th>Layer</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>gerberdiff — dropped flash reads as no change</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>2</td><td>netspec — no third verdict</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>3</td><td>orlab — version fallback is log-only</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
+      <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>5</td><td>orlab — unknown flight events dropped</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>6</td><td>partspec — tool fault emitted as part fault</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h2>The record</h2>
+
+  <div class="case">
+    <h3>1. A dropped Gerber flash reports as no change
+      <span class="tag open">open</span></h3>
+    <p class="meta">gerberdiff v0.29.1 ·
+      <a href="https://github.com/heibench/gerberdiff/issues/17">gerberdiff#17</a> ·
+      reproduced 2026-09-05</p>
+    <p>A flash selecting an undefined aperture is dropped with <strong>no diagnostic of
+    any severity</strong>. <code>diff</code> and <code>geomdiff</code> report
+    <code>0 changes</code> at exit <code>0</code> under <code>--fail-on-diff</code>,
+    and the JSON is byte-identical to diffing a board against a copy of itself.</p>
+    <p>Two things from that exercise generalise. <strong>The first reading was
+    wrong</strong> — the hypothesis under review was that <em>warning</em>-level
+    diagnostics leaked a silent pass; both engines in fact promote any
+    <code>Error</code> diagnostic to a raised <code>GerberParseError</code> and exit
+    <code>2</code>. The repro did not confirm the analysis; it replaced it. And
+    <strong>the tool already held the evidence</strong>: <code>gerberdiff parse</code>
+    prints <code>nets: 2, apertures: 1</code> and a bounding box reaching the dropped
+    pad's <em>centre</em> rather than its edge. Nothing had to be measured that was
+    not already being computed — there was simply no state in which to say it. That
+    is what a missing third outcome costs: not a measurement, a <strong>verdict</strong>.</p>
+  </div>
+
+  <div class="case">
+    <h3>2. netspec reports "could not evaluate" as "the board is wrong"
+      <span class="tag open">open</span></h3>
+    <p class="meta">netspec · <code>src/kicad_netspec/check.py:39</code> ·
+      read from source 2026-09-05</p>
+    <p><code>Verdict = Literal["pass", "fail"]</code>, green only when every rule is
+    green — so an <code>unsupported</code> rule collapses into <code>fail</code>,
+    saying the board is wrong when the truth is the tool could not check it. See
+    <a href="/adjudications.html">A2</a>.</p>
+  </div>
+
+  <div class="case">
+    <h3>3. orlab's version fallback reached the caller only as a log line
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">orlab ·
+      <a href="https://github.com/heibench/orlab/issues/61">orlab#61</a> ·
+      reproduced 2026-09-05 · fixed in <code>6ebbaad</code></p>
+    <p>The first instance found in the <strong>drive</strong> layer rather than the
+    verify layer: the same failure reaches a caller through a binding exactly as it
+    does through a checker. <code>get_profile()</code> correctly returned
+    <code>(profile, exact)</code>, but <code>OpenRocketInstance.__init__</code>
+    consumed <code>exact</code>, logged a warning and discarded it.</p>
+    <p>Two things the reproduction added to the suspicion. <strong>The single signal
+    was suppressible</strong> — setting the root logger to <code>ERROR</code>, an
+    ordinary application choice, removed the warning entirely, leaving no exception,
+    no return value and no attribute. And <strong>the obvious workaround was
+    wrong</strong>: comparing <code>or_version</code> to
+    <code>profile.version_string</code> looks equivalent, but
+    <code>parse_version</code> maps <code>24.12.RC.01</code> to <code>(24, 12)</code>
+    — an <em>exact</em> match whose strings differ — so the reconstruction reports a
+    fallback that is not one, on every RC and point-release build.</p>
+    <p>The fix exposes <code>profile_exact</code> on both
+    <code>OpenRocketInstance</code> and <code>SimulationPool</code>. Verified here by
+    mutation rather than by trusting the closed issue: discarding the value and
+    always reporting <code>True</code> fails 4 tests; implementing it as the naive
+    string comparison fails 2, including the test named for exactly that mutant.
+    Restored, 72 pass.</p>
+  </div>
+
+  <div class="case">
+    <h3>4. A G-code validator reports OK when the feature was never installed
+      <span class="tag open">open</span></h3>
+    <p class="meta">prusaslicer-first-layer-flow ·
+      <a href="https://github.com/CameronBrooks11/prusaslicer-first-layer-flow/issues/1">issue #1</a></p>
+    <p>Outside this org, and the reason the rule is stated as a general one rather than
+    a house style: <code>validate-gcode.py</code> reports <code>OK</code> at exit
+    <code>0</code> when the feature it verifies was never installed.</p>
+  </div>
+
+  <div class="case">
+    <h3>5. orlab drops unknown flight events, and the result looks complete
+      <span class="tag open">open</span></h3>
+    <p class="meta">orlab · <code>src/orlab/core/helper.py:195-203</code> ·
+      <a href="https://github.com/heibench/orlab/issues/63">orlab#63</a></p>
+    <p><code>Helper.get_events</code> drops flight-event types orlab's enum does not
+    know and tells the caller only through a log line. The returned dict then looks
+    complete: a caller iterating it cannot tell "this simulation had no such event"
+    from "orlab did not recognise the event and silently dropped it", and the log line
+    is suppressed entirely by an application that raises its log level.</p>
+    <p>This is case 3's defect one layer up, and arguably worse — #61 degraded a whole
+    run's fidelity in a way a user might notice, whereas this quietly removes rows
+    from a result the caller is about to analyse. It matters most on exactly the jars
+    #61 concerns: a newer OpenRocket on a nearest-older profile is where unknown event
+    types are most likely to appear.</p>
+  </div>
+
+  <div class="case">
+    <h3>6. A partspec tool fault is emitted as a fault in the part
+      <span class="tag open">open</span></h3>
+    <p class="meta">partspec ·
+      <a href="https://github.com/heibench/partspec/issues/371">partspec#371</a></p>
+    <p>When a measurement backend raises, the name lands in <code>refused</code> with a
+    reason — but the reason is prose, and it is the <strong>only</strong> signal
+    distinguishing a partspec bug from a defect in the part.
+    <code>main(["measure", ...])</code> returns <code>0</code> on a monkeypatched
+    raise, so an agent reading the JSON must string-match English to tell "this part
+    has no centre of mass" from "this backend crashed".</p>
+    <p>The founding property one level in: a tool fault reported at exit <code>0</code>,
+    in a block whose other entries mean "the part defeated this measurement", reads as
+    a statement about the part.</p>
+  </div>
+
+  <div class="case">
+    <h3>7. A dimension silently defaulted from <code>undef</code> passes green
+      <span class="tag open">open</span></h3>
+    <p class="meta">partspec · both pinned engines (2021.01 and 2026.08.01) ·
+      <a href="https://github.com/heibench/partspec/issues/308">partspec#308</a>,
+      remainder in
+      <a href="https://github.com/heibench/partspec/issues/332">#332</a> and
+      <a href="https://github.com/heibench/partspec/issues/338">#338</a></p>
+    <p>An expression whose type error makes OpenSCAD substitute a default into a
+    dimension. The engine prints one warning and exports a clean, watertight,
+    single-solid mesh:</p>
+<pre><code>o = undef;
+h = o + 1;
+linear_extrude(h) square([40,30]);</code></pre>
+    <p><code>linear_extrude</code> receives <code>undef</code> and falls back to a height
+    of <strong>100</strong>. <code>partspec measure</code> reports
+    <code>volume: 120000.0 mm3</code> — 40 × 30 × 100 — and <code>check</code> with
+    <code>watertight()</code> and <code>solid_count(1)</code> exits <code>0</code>. The
+    part is 100 mm tall because a name was undefined, and partspec reports it green.
+    The scalar case is narrated by <em>nothing at all</em> on either engine — no
+    warning to guard on.</p>
+  </div>
+
+  <div class="case">
+    <h3>8. partspec measures and draws a part whose data file is absent
+      <span class="tag open">open</span></h3>
+    <p class="meta">partspec · both pinned engines ·
+      <a href="https://github.com/heibench/partspec/issues/355">partspec#355</a></p>
+    <p><code>check</code> refuses a build whose depfile names a data file that is not on
+    disk. <code>measure</code> and <code>render</code> do not ask that question:
+    against a part importing a missing STL, <code>check</code> exits <code>4</code>
+    while <code>measure</code> exits <code>0</code> with
+    <code>volume: 7200.0 exact</code> and <code>render</code> exits <code>0</code>
+    with four PNGs. That volume is a bare 40 × 30 × 6 plate — the import contributes
+    nothing, which is the whole point. An agent measuring that number writes it into a
+    contract that then passes forever.</p>
+  </div>
+
+  <div class="case">
+    <h3>9. An explicit engine request is silently ignored
+      <span class="tag open">open</span></h3>
+    <p class="meta">netspec 0.7.0 ·
+      <a href="https://github.com/heibench/netspec/issues/17">netspec#17</a></p>
+    <p><code>NETSPEC_KICAD_CLI</code> pointing at a path that does not exist is ignored
+    silently. Discovery falls through to the next candidate and the run succeeds
+    <strong>against a different engine than the one explicitly requested</strong>, with
+    nothing said on stdout, stderr or in the report, at exit <code>0</code>.</p>
+    <p>The variable is presented as authoritative, not as a hint — it is what the tool's
+    own error message tells you to set.</p>
+  </div>
+
+  <h2>What the record is for</h2>
+
+  <p>Three of the first four were found by <em>running</em> the code after a reading of
+  it had concluded something different, twice concluding the wrong mechanism
+  entirely. That is why
+  <a href="https://github.com/heibench/.github/blob/main/AGENTS.md">AGENTS.md</a> §7
+  requires a reproduction before a report, and why a fix is verified by breaking the
+  thing it fixes and watching the check go red.</p>
+
+  <p>This list is what has been written up. It is a floor, not a census.</p>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>heibench — <a href="https://github.com/heibench">github.com/heibench</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

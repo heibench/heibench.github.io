@@ -1,0 +1,229 @@
+/* heibench.com — no build step, no dependencies, no JavaScript. */
+
+:root {
+  color-scheme: light dark;
+  --navy: #0b3a75;
+  --steel: #8c99a6;
+  --ink: #16191d;
+  --ink-soft: #4d565f;
+  --bg: #fbfaf8;
+  --panel: #ffffff;
+  --rule: #dcdcd6;
+  --accent: var(--navy);
+  --ok: #1c6b3f;
+  --open: #9a4a12;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --navy: #7ea8dd;
+    --steel: #98a4b1;
+    --ink: #e7e9ec;
+    --ink-soft: #a3abb5;
+    --bg: #12151a;
+    --panel: #191d24;
+    --rule: #2c323b;
+    --accent: var(--navy);
+    --ok: #6cc38d;
+    --open: #e0a06a;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+code, pre, .mono {
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+}
+
+.wrap { max-width: 46rem; margin: 0 auto; padding: 0 1.25rem; }
+
+/* ---------- masthead ---------- */
+
+header.site {
+  border-bottom: 1px solid var(--rule);
+  background: var(--panel);
+}
+
+header.site .wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding-top: 0.9rem;
+  padding-bottom: 0.9rem;
+  flex-wrap: wrap;
+}
+
+header.site img {
+  width: 30px;
+  height: 30px;
+  display: block;
+  border-radius: 6px;
+}
+
+header.site a.home {
+  font-weight: 650;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  text-decoration: none;
+  font-size: 1.05rem;
+}
+
+header.site nav {
+  margin-left: auto;
+  display: flex;
+  gap: 1.1rem;
+  font-size: 0.9rem;
+}
+
+header.site nav a { color: var(--ink-soft); text-decoration: none; }
+header.site nav a:hover,
+header.site nav a[aria-current="page"] { color: var(--accent); }
+
+/* ---------- type ---------- */
+
+main.wrap { padding-top: 3rem; padding-bottom: 4rem; }
+
+h1 {
+  font-size: 2.1rem;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.6rem;
+}
+
+.tagline {
+  font-size: 1.15rem;
+  color: var(--ink-soft);
+  margin: 0 0 2.5rem;
+}
+
+h2 {
+  font-size: 1.3rem;
+  letter-spacing: -0.015em;
+  margin: 3rem 0 0.9rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--rule);
+}
+
+h3 { font-size: 1.02rem; margin: 2rem 0 0.5rem; }
+
+p, li { color: var(--ink); }
+a { color: var(--accent); }
+
+.lead { font-size: 1.05rem; }
+
+blockquote {
+  margin: 1.6rem 0;
+  padding: 0.2rem 0 0.2rem 1.1rem;
+  border-left: 3px solid var(--accent);
+  font-size: 1.15rem;
+  line-height: 1.5;
+  color: var(--ink);
+}
+
+blockquote p { margin: 0; }
+
+/* ---------- tables ---------- */
+
+.scroll { overflow-x: auto; margin: 1.4rem 0; }
+
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.92rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.6rem 0.8rem 0.6rem 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+th {
+  font-weight: 620;
+  color: var(--ink-soft);
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* ---------- case entries ---------- */
+
+.case {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  padding: 1.1rem 1.2rem;
+  margin: 1.1rem 0;
+}
+
+.case h3 { margin-top: 0; }
+.case p:last-child { margin-bottom: 0; }
+
+.tag {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 3px;
+  border: 1px solid currentColor;
+  vertical-align: 0.1em;
+}
+
+.tag.open { color: var(--open); }
+.tag.resolved { color: var(--ok); }
+
+.meta {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin: 0.35rem 0 0.7rem;
+}
+
+pre {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 4px;
+  padding: 0.8rem 0.9rem;
+  overflow-x: auto;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  margin: 1rem 0;
+}
+
+code { font-size: 0.9em; }
+p code, li code, td code {
+  background: var(--panel);
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  padding: 0.05em 0.32em;
+}
+pre code { background: none; border: 0; padding: 0; }
+
+/* ---------- footer ---------- */
+
+footer.site {
+  border-top: 1px solid var(--rule);
+  padding: 1.8rem 0 3rem;
+  font-size: 0.87rem;
+  color: var(--ink-soft);
+}
+
+footer.site a { color: var(--ink-soft); }
+
+@media (max-width: 34rem) {
+  h1 { font-size: 1.7rem; }
+  header.site nav { gap: 0.85rem; width: 100%; margin-left: 0; }
+}

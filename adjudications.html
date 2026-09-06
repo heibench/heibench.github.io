@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Open adjudications — heibench</title>
+<meta name="description" content="Real conflicts between shipped heibench members, recorded rather than resolved.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <img src="/assets/favicon.svg" alt="">
+    <a class="home" href="/">heibench</a>
+    <nav>
+      <a href="/">Overview</a>
+      <a href="/silence.html">The rule</a>
+      <a href="/adjudications.html" aria-current="page">Adjudications</a>
+      <a href="https://github.com/heibench">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h1>Open adjudications</h1>
+  <p class="tagline">Real conflicts between shipped members, recorded rather than
+  resolved.</p>
+
+  <p class="lead">Resolving one of these changes released behaviour, and that is a
+  decision with an owner. They are written down so a consumer knows what it is
+  reading, not so someone quietly harmonises them.</p>
+
+  <p><strong>Do not "fix" a member to match this page without an issue and a decision
+  entry.</strong> The vocabulary follows the tools; the tools do not silently follow
+  the vocabulary. Decisions live in each repo's <code>docs/DECISIONS.md</code>,
+  numbered, with the reasoning that produced them — do not relitigate a numbered
+  decision; if it is wrong, add a superseding entry.</p>
+
+  <h2>Shared vocabulary</h2>
+
+  <h3>Statuses, per check</h3>
+  <p>Common core, in every member that adjudicates: <code>pass</code> ·
+  <code>fail</code> · <code>unsupported</code> · <code>skipped</code>. Only
+  <code>pass</code> is green.</p>
+
+  <p><code>approximate</code> is a <strong>domain-gated extension</strong>, for when a
+  measured error interval straddles the threshold. partspec has it; netspec
+  deliberately does not, because connectivity is discrete and importing interval
+  epistemics into an exact domain adds concepts without adding truth (D9, guarded by
+  <code>test_report_carries_no_tolerance</code>). <strong>Absence is a decision to
+  record, not an omission to fix.</strong></p>
+
+  <h3>Exit codes</h3>
+  <p>Agreed across partspec and netspec today:</p>
+<pre><code>0    satisfied
+1    violated
+4    environment fault / error — not a verdict on the design</code></pre>
+
+  <h2>The adjudications</h2>
+
+  <div class="case">
+    <h3>A1 — exit code <code>2</code> means two different things
+      <span class="tag open">open</span></h3>
+    <p class="meta">verified against source 2026-09-05</p>
+    <p>partspec maps <code>Verdict.INCOMPLETE</code> to exit <code>2</code>
+    (<code>src/partspec/status.py:107</code>) and puts usage at <code>64</code>
+    (<code>EX_USAGE</code>). netspec uses <code>EXIT_USAGE = 2</code>
+    (<code>src/kicad_netspec/cli.py:32</code>), with no code for "could not evaluate".
+    A consumer branching on <code>2</code> across both tools is reading two different
+    facts.</p>
+    <p><em>Recommendation:</em> adopt partspec's split.</p>
+  </div>
+
+  <div class="case">
+    <h3>A2 — netspec cannot report "could not tell" at the verdict level
+      <span class="tag open">open</span></h3>
+    <p class="meta">read from source 2026-09-05, not reproduced</p>
+    <p><code>Verdict = Literal["pass", "fail"]</code>
+    (<code>src/kicad_netspec/check.py:39</code>), green only when every rule is green —
+    so an <code>unsupported</code> rule collapses into <code>fail</code>, saying the
+    board is wrong when the truth is the tool could not check it. D10 also documents a
+    <code>verdict: "error"</code> the type does not contain; the environment fault
+    rides on the exit code, not on a report field as D10 requires.</p>
+    <p>Also <a href="/silence.html">case 2</a> in the record of the core defect.</p>
+  </div>
+
+  <div class="case">
+    <h3>A3 — gerberdiff has no third state
+      <span class="tag open">open</span></h3>
+    <p class="meta">reproduced 2026-09-05, v0.29.1 ·
+      <a href="https://github.com/heibench/gerberdiff/issues/17">gerberdiff#17</a></p>
+    <p><code>has_changes: boolean</code> (<code>docs/schema.md</code>), layer status
+    <code>matched | added | removed</code>. For a differ, too, silence must never read
+    as <em>no difference</em>.</p>
+    <p>Written up in full as <a href="/silence.html">case 1</a>.</p>
+  </div>
+
+  <div class="case">
+    <h3>A4 — orlab's version fallback was log-only
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">reproduced 2026-09-05 · fixed in <code>6ebbaad</code>,
+      <a href="https://github.com/heibench/orlab/issues/61">orlab#61</a> closed</p>
+    <p>Resolved: <code>profile_exact</code> is now a public attribute on both
+    <code>OpenRocketInstance</code> and <code>SimulationPool</code>, so a caller can
+    branch on whether it is running against an exact profile or a nearest-older
+    fallback. Retained as <a href="/silence.html">case 3</a> in the record, where it is
+    the first instance found in the <strong>drive</strong> layer rather than the verify
+    layer.</p>
+  </div>
+
+  <h2>The rule that produced them</h2>
+
+  <p>Every adjudication here is a disagreement about how to say <em>could not tell</em>.
+  That is not a coincidence — it is the
+  <a href="/silence.html">one rule everything else follows from</a>, showing up at the
+  seams between tools that each solved it slightly differently.</p>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>heibench — <a href="https://github.com/heibench">github.com/heibench</a></p>
+  </div>
+</footer>
+
+</body>
+</html>

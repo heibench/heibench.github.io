@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>heibench — drive the engine, check the result</title>
+<meta name="description" content="Hardware Engineering Integration bench: put engineering engines under program control, and adjudicate what they produce against declared intent.">
+<link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<link rel="stylesheet" href="/assets/site.css">
+</head>
+<body>
+
+<header class="site">
+  <div class="wrap">
+    <img src="/assets/favicon.svg" alt="">
+    <a class="home" href="/">heibench</a>
+    <nav>
+      <a href="/" aria-current="page">Overview</a>
+      <a href="/silence.html">The rule</a>
+      <a href="/adjudications.html">Adjudications</a>
+      <a href="https://github.com/heibench">GitHub</a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <h1>Hardware Engineering Integration bench</h1>
+  <p class="tagline">Drive the engine. Check the result.</p>
+
+  <p class="lead">Engineering engines — OpenRocket, PrusaSlicer, KiCad, OpenSCAD, OCCT — are
+  built for a person sitting at a GUI. Two things follow, and the second is the one
+  that bites.</p>
+
+  <p>A program cannot drive them well. Every one has a CLI or a binding, and every one
+  of those is version-skewed, undocumented in places, and shaped around a human who
+  will notice when something looks wrong.</p>
+
+  <p><strong>And a program cannot look at the result.</strong> You catch a bad render by
+  glancing at it. A script does not glance. Neither does an agent. So a tool that
+  returns a plausible-looking artifact and says nothing is not merely unhelpful — it
+  is indistinguishable from a tool that worked, and everything downstream inherits
+  the mistake.</p>
+
+  <p>heibench does those two things and nothing else: it puts engineering engines under
+  program control, and it adjudicates what they produce against declared intent.</p>
+
+  <h2>The two layers</h2>
+
+  <h3>Drive</h3>
+  <p>Put the engine under program control: headless, scriptable, version-aware,
+  deterministic.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Tool</th><th>Engine</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="https://github.com/heibench/orlab">orlab</a></td>
+        <td>OpenRocket, via JPype — load <code>.ork</code>, run simulations, extract
+        time series and flight events</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/heibench/prusaslicer-py">prusaslicer-py</a></td>
+        <td>PrusaSlicer, via its CLI — slice a model and get back a verified artifact,
+        on PATH or as a Flatpak</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <h3>Verify</h3>
+  <p>Adjudicate an artifact against declared intent.</p>
+
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Tool</th><th>Domain</th><th>Oracle</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><a href="https://github.com/heibench/partspec">partspec</a></td>
+        <td>mechanical parts, CAD-as-code</td>
+        <td>OpenSCAD, OCCT (build123d / CadQuery)</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/heibench/netspec">netspec</a></td>
+        <td>PCB connectivity</td>
+        <td><code>kicad-cli</code></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/heibench/gerberdiff">gerberdiff</a></td>
+        <td>fabrication output (Gerber / Excellon)</td>
+        <td>the fabrication files themselves</td>
+      </tr>
+    </tbody>
+  </table>
+  </div>
+
+  <p>Each tool is independent — no shared runtime, no framework, nothing to adopt in
+  order to use one.</p>
+
+  <h2>What belongs here</h2>
+
+  <p>A tool belongs if <strong>both</strong> hold:</p>
+
+  <ol>
+    <li>It puts an engineering engine or artifact under <strong>program control</strong> —
+    headless, scriptable, deterministic, no human in the loop.</li>
+    <li>It is <strong>honest about what it established</strong> — a structured result, a
+    meaningful exit code, never reporting success it did not verify and never
+    substituting a plausible result for a real one.</li>
+  </ol>
+
+  <p>The second is not a quality preference. It is the condition that makes the first
+  worth anything, and it is violated constantly — including
+  <a href="/silence.html">nine times in this author's own code</a>, across five
+  unrelated domains, eight of which are still open.</p>
+
+  <h2>What does not</h2>
+
+  <p>Authoring and design generation, language runtimes, slicer post-processing,
+  dependency management, and machine control at runtime are all out of scope.
+  heibench is the design-time middle: <strong>operate the tool, and know whether to
+  believe the output.</strong></p>
+
+  <h2>The contract</h2>
+
+  <p>Humans and coding agents working in any heibench repository follow
+  <a href="https://github.com/heibench/.github/blob/main/AGENTS.md">AGENTS.md</a>.
+  Each repository also carries its own, which wins where they conflict; the org-wide
+  file is the floor, not the ceiling.</p>
+
+  <p>This site is canonical for the evidence behind that contract — the
+  <a href="/silence.html">record of the core defect</a> and the
+  <a href="/adjudications.html">open adjudications</a> between members.</p>
+
+</main>
+
+<footer class="site">
+  <div class="wrap">
+    <p>heibench — <a href="https://github.com/heibench">github.com/heibench</a></p>
+  </div>
+</footer>
+
+</body>
+</html>
