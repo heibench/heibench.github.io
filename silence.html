@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the ten recorded instances of the defect it exists to prevent. Two still open.">
+<meta name="description" content="The rule every heibench tool follows, and the ten recorded instances of the defect it exists to prevent. Nine fixed, one accepted.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -54,8 +54,20 @@
   <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
   has been recorded <strong>ten times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Two are
-  still open.</strong></p>
+  domains</strong>, written at different times by the same author. <strong>Nine are
+  fixed. One is accepted.</strong></p>
+
+  <p><strong>Three states, because two could not carry the answer.</strong>
+  <span class="tag open">open</span> means nobody has fixed it yet.
+  <span class="tag resolved">resolved</span> means it is fixed.
+  <span class="tag accepted">accepted</span> means it has been measured and
+  <em>deliberately</em> not fixed, because every channel that could refuse the defect
+  refuses correct work too — case 7 is the only one, and its three issues stay open
+  naming the boundary rather than waiting on anybody. Calling it <em>open</em> said
+  work was pending; calling it <em>resolved</em> would say the tool no longer does it.
+  Both were false, which is the same shape as the defect this page is about, in the page
+  itself. netspec, gerberdiff and partspec each grew a third state this week for the same
+  reason.</p>
 
   <p>Every case here is tracked by an issue labelled
   <a href="https://github.com/search?q=org%3Aheibench+label%3Asilence-defect&amp;type=issues"><code>silence-defect</code></a>.
@@ -73,10 +85,10 @@
       <tr><td>1</td><td>gerberdiff — dropped flash reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>2</td><td>netspec — no third verdict</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>3</td><td>orlab — version fallback is log-only</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
-      <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>5</td><td>orlab — unknown flight events dropped</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>6</td><td>partspec — tool fault emitted as part fault</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
-      <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag accepted">accepted</span></td></tr>
       <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>10</td><td>gerberdiff — an unmodelled trace reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
@@ -158,9 +170,16 @@
 
   <div class="case">
     <h3>4. A G-code validator reports OK when the feature was never installed
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">prusaslicer-first-layer-flow ·
-      <a href="https://github.com/CameronBrooks11/prusaslicer-first-layer-flow/issues/1">issue #1</a></p>
+      <a href="https://github.com/CameronBrooks11/prusaslicer-first-layer-flow/issues/1">issue #1</a> ·
+      fixed in <code>30c2175</code>, 2026-09-06</p>
+    <p><strong>Resolved:</strong> the positional fallback is gone, and an absent marker
+    gets its own exit code — <code>0</code> verified, <code>1</code> wrong,
+    <code>2</code> the feature never ran. Worth recording what the fix nearly did: its
+    first version left "the feature never ran" and "you gave me a bad path" both on
+    <code>2</code>, one code for two meanings, which is A1 in miniature. The regression
+    test found it, on the run that was meant to confirm the fix.</p>
     <p>Outside this org, and the reason the rule is stated as a general one rather than
     a house style: <code>validate-gcode.py</code> reports <code>OK</code> at exit
     <code>0</code> when the feature it verifies was never installed.</p>
@@ -213,7 +232,7 @@
 
   <div class="case">
     <h3>7. A dimension silently defaulted from <code>undef</code> passes green
-      <span class="tag open">open</span></h3>
+      <span class="tag accepted">accepted</span></h3>
     <p class="meta">partspec · both pinned engines (2021.01 and 2026.08.01) ·
       <a href="https://github.com/heibench/partspec/issues/308">partspec#308</a>,
       remainder in

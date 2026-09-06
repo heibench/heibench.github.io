@@ -185,6 +185,9 @@ th {
 
 .tag.open { color: var(--open); }
 .tag.resolved { color: var(--ok); }
+/* Understood, measured, and deliberately not fixed. Neither of the other two
+   says that, and saying it with one of them would be false either way. */
+.tag.accepted { color: var(--ink-soft); }
 
 .meta {
   font-size: 0.85rem;
