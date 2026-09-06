@@ -26,3 +26,12 @@ Adding a case to the record means adding it here, not to `AGENTS.md`.
 
 Then open <http://localhost:8000>. The pages use root-relative paths, so
 opening the files directly over `file://` will not load the stylesheet.
+
+## Licence
+
+[CC BY 4.0](LICENSE). This is prose and a stylesheet, not software: the
+material here exists to be quoted and argued with, and CC BY says so while
+asking for attribution. The tools themselves are licensed per repository —
+Apache-2.0 where the binding leaves the choice open, and whatever the engine
+compels where it does not.
+
