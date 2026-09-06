@@ -97,7 +97,16 @@
     <p><code>has_changes: boolean</code> (<code>docs/schema.md</code>), layer status
     <code>matched | added | removed</code>. For a differ, too, silence must never read
     as <em>no difference</em>.</p>
-    <p>Written up in full as <a href="/silence.html">case 1</a>.</p>
+    <p>Written up in full as <a href="/silence.html">case 1</a>, which is now
+    <strong>resolved</strong> — gerberdiff#17 was fixed in <code>d71f6ce</code>
+    (2026-09-06), so an undefined aperture is an <code>Error</code> and exits
+    <code>2</code> rather than dropping the flash in silence.</p>
+    <p><strong>A3 itself stays open.</strong> That fix closed one instance; it did not
+    give the differ a third state. <code>has_changes</code> is still
+    <code>boolean</code> and layer status is still
+    <code>matched | added | removed</code>, so a comparison that could not be made is
+    still not expressible in the report. Fixing an instance is not the same as closing
+    the adjudication, and conflating the two is how the record drifts.</p>
   </div>
 
   <div class="case">
