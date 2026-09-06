@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent.">
+<meta name="description" content="The rule every heibench tool follows, and the nine recorded instances of the defect it exists to prevent. Six still open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -51,11 +51,18 @@
 
   <h2>How often it is violated is the point</h2>
 
-  <p>As of 2026-09-05 this exact defect — no state for <em>could not tell</em>,
+  <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
   has been recorded <strong>nine times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Eight are
+  domains</strong>, written at different times by the same author. <strong>Six are
   still open.</strong></p>
+
+  <p>Every case here is tracked by an issue labelled
+  <a href="https://github.com/search?q=org%3Aheibench+label%3Asilence-defect&amp;type=issues"><code>silence-defect</code></a>.
+  That label is what links finding an instance to recording it, and it makes the
+  drift checkable rather than merely regrettable: if the label and this page
+  disagree, this page is wrong. It went stale twice before the label existed —
+  once by five cases, and once by two within a single day.</p>
 
   <p>Nobody set out to build any of them that way. Assume you are doing it too.</p>
 
@@ -63,7 +70,7 @@
   <table>
     <thead><tr><th>#</th><th>Where</th><th>Layer</th><th>Status</th></tr></thead>
     <tbody>
-      <tr><td>1</td><td>gerberdiff — dropped flash reads as no change</td><td>verify</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>1</td><td>gerberdiff — dropped flash reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>2</td><td>netspec — no third verdict</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>3</td><td>orlab — version fallback is log-only</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>4</td><td>prusaslicer-first-layer-flow — OK when never installed</td><td>verify</td><td><span class="tag open">open</span></td></tr>
@@ -71,7 +78,7 @@
       <tr><td>6</td><td>partspec — tool fault emitted as part fault</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>7</td><td>partspec — <code>undef</code> dimension passes green</td><td>verify</td><td><span class="tag open">open</span></td></tr>
       <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag open">open</span></td></tr>
-      <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -80,10 +87,10 @@
 
   <div class="case">
     <h3>1. A dropped Gerber flash reports as no change
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">gerberdiff v0.29.1 ·
       <a href="https://github.com/heibench/gerberdiff/issues/17">gerberdiff#17</a> ·
-      reproduced 2026-09-05</p>
+      reproduced 2026-09-05 · fixed in <code>d71f6ce</code>, 2026-09-06</p>
     <p>A flash selecting an undefined aperture is dropped with <strong>no diagnostic of
     any severity</strong>. <code>diff</code> and <code>geomdiff</code> report
     <code>0 changes</code> at exit <code>0</code> under <code>--fail-on-diff</code>,
@@ -104,6 +111,7 @@
     <h3>2. netspec reports "could not evaluate" as "the board is wrong"
       <span class="tag open">open</span></h3>
     <p class="meta">netspec · <code>src/kicad_netspec/check.py:39</code> ·
+      <a href="https://github.com/heibench/netspec/issues/19">netspec#19</a> ·
       read from source 2026-09-05</p>
     <p><code>Verdict = Literal["pass", "fail"]</code>, green only when every rule is
     green — so an <code>unsupported</code> rule collapses into <code>fail</code>,
@@ -222,9 +230,10 @@ linear_extrude(h) square([40,30]);</code></pre>
 
   <div class="case">
     <h3>9. An explicit engine request is silently ignored
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">netspec 0.7.0 ·
-      <a href="https://github.com/heibench/netspec/issues/17">netspec#17</a></p>
+      <a href="https://github.com/heibench/netspec/issues/17">netspec#17</a> ·
+      fixed in <code>1edc6c0</code>, 2026-09-06 (D10.1)</p>
     <p><code>NETSPEC_KICAD_CLI</code> pointing at a path that does not exist is ignored
     silently. Discovery falls through to the next candidate and the run succeeds
     <strong>against a different engine than the one explicitly requested</strong>, with
