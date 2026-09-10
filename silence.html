@@ -412,16 +412,20 @@ PrusaSlicer-2.9.6 based on Slic3r (with GUI support)</code></pre>
       <span class="tag resolved">resolved</span></h3>
     <p class="meta">netspec &middot; <code>src/kicad_netspec/mcp.py:212</code> &middot;
       <a href="https://github.com/heibench/netspec/issues/35">netspec#35</a>
-      &middot; reproduced 2026-09-10 &middot; fixed in <code>e041686</code>, 2026-09-10</p>
+      &middot; reproduced 2026-09-07 &middot; fixed in <code>e041686</code>, 2026-09-10</p>
     <p><strong>Resolved:</strong> <code>netspec-mcp</code> now separates "the package is
     absent" from "the package is here and the symbol moved", using
     <code>find_spec("mcp")</code> as the observation, and prints upstream's own text in
     the second case. Both still exit <code>4</code>, because both still mean netspec
     could not tell you anything about your board.</p>
-    <p>Under <code>mcp</code> 2.x, <code>mcp.server.fastmcp</code> no longer exists, and
-    upstream is about as helpful as a library can be about it &mdash; naming the rename to
-    <code>MCPServer</code>, the new import path, the migration guide, and the
-    <code>mcp&lt;2</code> pin that keeps v1 code running:</p>
+    <p>Under <code>mcp</code> 2.x, <code>mcp/server/fastmcp.py</code> is a stub that
+    raises, and upstream is about as helpful as a library can be about it &mdash; naming
+    the rename to <code>MCPServer</code>, the new import path, the migration guide, and
+    the <code>mcp&lt;2</code> pin that keeps v1 code running. <strong>Reaching it took a
+    fresh venv with the constraint overridden</strong>: netspec's own extra is
+    <code>mcp&gt;=1.27,&lt;2</code> and has been since the scaffold commit, the widening
+    to <code>&lt;3</code> is an open pull request, and so no released netspec resolves
+    2.x. The typecheck that caught it ran on that branch, not on <code>main</code>.</p>
 <pre><code>$ python -c "import mcp.server.fastmcp"
 ModuleNotFoundError: No module named 'mcp.server.fastmcp'. This is mcp 2.x, where
 FastMCP was renamed to MCPServer (from mcp.server.mcpserver import MCPServer) and
@@ -430,8 +434,14 @@ other APIs changed; see the migration guide at ... or pin 'mcp&lt;2' ...</code><
     <code>ModuleNotFoundError</code> is a subclass of it, so every word of that was
     discarded and replaced with <code>netspec-mcp needs the mcp extra: pip install
     'kicad-netspec[mcp]'</code>. The extra <em>was</em> installed. The user is told to
-    install what they already have, and the one thing that reported the truth was
-    pyright, in CI.</p>
+    install what they already have.</p>
+    <p><strong>Which is not confined to the unreleased pin</strong>, and that is why this
+    is a case rather than a note on a bump. The handler was a bare
+    <code>except ImportError</code> that read nothing off the exception, so it answered
+    <em>every</em> import failure with the same sentence. An incomplete install &mdash;
+    <code>mcp</code> 1.30.0, well inside the shipping <code>&lt;2</code> pin, with a
+    transitive dependency of it missing &mdash; arrives at the same handler and gets the
+    same wrong cause. 2.x is the sharpest illustration, not the reach.</p>
     <p><strong>This one misroutes rather than fabricates</strong>, which places it beside
     case 11 rather than case 12. The failure is real, exit <code>4</code> is the right
     channel for it under §2.2, and netspec genuinely could not run; only the cause was
@@ -442,9 +452,13 @@ other APIs changed; see the migration guide at ... or pin 'mcp&lt;2' ...</code><
     on the other side of it and is deliberately not on this page.
     <a href="https://github.com/heibench/netspec/issues/26">netspec#26</a> carries an
     environment fault in the exit code but not as a report field &mdash; an omission, and
-    nothing it says is false. #35 held the right answer and stated a wrong one. Failing to
-    say something and saying something else are not the same defect, and only the second
-    is this one.</p>
+    nothing it says is false. But omission is not the line, because case 3 is a pure
+    failure to say something and is on this record. The line is whether the channel can be
+    <strong>silenced</strong>, which is #26's own argument: case 3's only signal was a log
+    line, and an application setting its root logger to <code>ERROR</code> removed it
+    entirely, leaving nothing at all; #26's channel is an exit code, which no caller's
+    configuration can turn off. #35 needs neither test &mdash; it held the right answer
+    and stated a wrong one.</p>
   </div>
 
   <div class="case">
