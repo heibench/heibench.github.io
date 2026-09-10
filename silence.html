@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Silence must never read as success — heibench</title>
-<meta name="description" content="The rule every heibench tool follows, and the twelve recorded instances of the defect it exists to prevent. Nine fixed, one accepted, two open.">
+<meta name="description" content="The rule every heibench tool follows, and the fourteen recorded instances of the defect it exists to prevent. Twelve fixed, one accepted, one open.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -51,11 +51,11 @@
 
   <h2>How often it is violated is the point</h2>
 
-  <p>As of 2026-09-06 this exact defect — no state for <em>could not tell</em>,
+  <p>As of 2026-09-10 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
-  has been recorded <strong>twelve times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Nine are
-  fixed, one is accepted, two are open.</strong></p>
+  has been recorded <strong>fourteen times</strong>, across <strong>five unrelated
+  domains</strong>, written at different times by the same author. <strong>Twelve are
+  fixed, one is accepted, one is open.</strong></p>
 
   <p><strong>Three states, because two could not carry the answer.</strong>
   <span class="tag open">open</span> means nobody has fixed it yet.
@@ -92,8 +92,10 @@
       <tr><td>8</td><td>partspec — measures a part whose data file is absent</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>9</td><td>netspec — explicit engine request silently ignored</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>10</td><td>gerberdiff — an unmodelled trace reads as no change</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
-      <tr><td>11</td><td>prusaslicer-py — unusable engine reported as a code failure</td><td>drive</td><td><span class="tag open">open</span></td></tr>
-      <tr><td>12</td><td>prusaslicer-py — a preamble line returned as the version</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+      <tr><td>11</td><td>prusaslicer-py — unusable engine reported as a code failure</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
+      <tr><td>12</td><td>prusaslicer-py — a preamble line returned as the version</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
+      <tr><td>13</td><td>netspec — a real failure blamed on an invented cause</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
+      <tr><td>14</td><td>prusaslicer-py — an installed macOS engine reads as absent</td><td>drive</td><td><span class="tag open">open</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -324,11 +326,20 @@ linear_extrude(h) square([40,30]);</code></pre>
 
   <div class="case">
     <h3>11. A PrusaSlicer that cannot start is reported as a failure of the code
-      <span class="tag open">open</span></h3>
+      <span class="tag resolved">resolved</span></h3>
     <p class="meta">prusaslicer-py &middot; <code>prusaslicer_py/slicer.py</code>,
       <code>tests/conftest.py</code> &middot;
       <a href="https://github.com/heibench/prusaslicer-py/issues/33">prusaslicer-py#33</a>
-      &middot; reproduced 2026-09-06</p>
+      &middot; reproduced 2026-09-06 &middot; fixed in <code>dfbc23e</code>, 2026-09-10
+      (D14)</p>
+    <p><strong>Resolved:</strong> discovery now answers in three states rather than two.
+    <code>PrusaSlicer.probe()</code> runs <code>--help</code> and raises
+    <code>EngineUnusableError</code> unless the engine started and answered, so
+    <em>absent</em>, <em>present and unusable</em> and <em>usable</em> are separable, and
+    conftest routes the middle one to the same skip-or-fail decision as the first &mdash;
+    one function, because the half that gets dropped when the decision is duplicated is
+    always the <em>require</em> half, which is the invisible one. The engine's own
+    complaint is carried as a field rather than left in prose.</p>
     <p>Engine discovery accepts a Flatpak when <code>flatpak info</code> exits
     <code>0</code>. That establishes the app is <em>installed</em>, not that it can
     <em>run</em>. With an unwritable <code>HOME</code> the launcher fails before the
@@ -360,11 +371,21 @@ error: mkdirat(.var): Permission denied         # exit 1</code></pre>
 
   <div class="case">
     <h3>12. A build that greets you before it identifies itself reports the greeting
-      as its version <span class="tag open">open</span></h3>
+      as its version <span class="tag resolved">resolved</span></h3>
     <p class="meta">prusaslicer-py &middot; <code>prusaslicer_py/slicer.py:210</code>
       &middot;
       <a href="https://github.com/heibench/prusaslicer-py/issues/34">prusaslicer-py#34</a>
-      &middot; reproduced 2026-09-06</p>
+      &middot; reproduced 2026-09-06 &middot; fixed in <code>00cd43c</code>, 2026-09-10
+      (D13)</p>
+    <p><strong>Resolved:</strong> the banner is <em>matched</em> rather than counted to
+    &mdash; the first line matching <code>^PrusaSlicer-(\d\S*)</code>, on either stream
+    &mdash; and a build that identifies itself nowhere raises
+    <code>VersionUnreadableError</code> instead of returning something. The signature
+    stays <code>-&gt; str</code>: there is no line to return, so nothing is returned, and
+    the third outcome is the exception rather than a widened return type. Note which
+    narrowings were refused. Requiring <code>based on Slic3r</code> would answer
+    <em>could not tell</em> for a version plainly present, and §2.1's third outcome is
+    not licence to refuse more than the question requires.</p>
     <p>PrusaSlicer has no <code>--version</code> flag &mdash; 2.9.6 answers
     <code>Unknown option --version</code> and exits <code>1</code> &mdash; so the version
     is read from the first line of <code>--help</code>. The native Windows console build
@@ -384,6 +405,103 @@ PrusaSlicer-2.9.6 based on Slic3r (with GUI support)</code></pre>
     read comes back looking exactly like one it could. Found by a sibling project's
     four-platform engine matrix &mdash; the defect needed a second platform to become
     visible, and neither project had one.</p>
+  </div>
+
+  <div class="case">
+    <h3>13. netspec throws away the cause it was handed and states a different one
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">netspec &middot; <code>src/kicad_netspec/mcp.py:212</code> &middot;
+      <a href="https://github.com/heibench/netspec/issues/35">netspec#35</a>
+      &middot; reproduced 2026-09-07 &middot; fixed in <code>e041686</code>, 2026-09-10</p>
+    <p><strong>Resolved:</strong> <code>netspec-mcp</code> now separates "the package is
+    absent" from "the package is here and the symbol moved", using
+    <code>find_spec("mcp")</code> as the observation, and prints upstream's own text in
+    the second case. Both still exit <code>4</code>, because both still mean netspec
+    could not tell you anything about your board.</p>
+    <p>Under <code>mcp</code> 2.x, <code>mcp/server/fastmcp.py</code> is a stub that
+    raises, and upstream is about as helpful as a library can be about it &mdash; naming
+    the rename to <code>MCPServer</code>, the new import path, the migration guide, and
+    the <code>mcp&lt;2</code> pin that keeps v1 code running. <strong>Reaching it took a
+    fresh venv with the constraint overridden</strong>: netspec's own extra is
+    <code>mcp&gt;=1.27,&lt;2</code> and has been since the scaffold commit, the widening
+    to <code>&lt;3</code> is an open pull request, and so no released netspec resolves
+    2.x. The typecheck that caught it ran on that branch, not on <code>main</code>.</p>
+<pre><code>$ python -c "import mcp.server.fastmcp"
+ModuleNotFoundError: No module named 'mcp.server.fastmcp'. This is mcp 2.x, where
+FastMCP was renamed to MCPServer (from mcp.server.mcpserver import MCPServer) and
+other APIs changed; see the migration guide at ... or pin 'mcp&lt;2' ...</code></pre>
+    <p>The entry point caught <code>ImportError</code>, and
+    <code>ModuleNotFoundError</code> is a subclass of it, so every word of that was
+    discarded and replaced with <code>netspec-mcp needs the mcp extra: pip install
+    'kicad-netspec[mcp]'</code>. The extra <em>was</em> installed. The user is told to
+    install what they already have.</p>
+    <p><strong>Which is not confined to the unreleased pin</strong>, and that is why this
+    is a case rather than a note on a bump. The handler was a bare
+    <code>except ImportError</code> that read nothing off the exception, so it answered
+    <em>every</em> import failure with the same sentence. An incomplete install &mdash;
+    <code>mcp</code> 1.30.0, well inside the shipping <code>&lt;2</code> pin, with a
+    transitive dependency of it missing &mdash; arrives at the same handler and gets the
+    same wrong cause. 2.x is the sharpest illustration, not the reach.</p>
+    <p><strong>This one misroutes rather than fabricates</strong>, which places it beside
+    case 11 rather than case 12. The failure is real, exit <code>4</code> is the right
+    channel for it under §2.2, and netspec genuinely could not run; only the cause was
+    invented. The issue's own prose calls that reason fabricated &mdash; on this record's
+    axis the word belongs to case 12, where a version that could not be read came back
+    looking exactly like one that could.</p>
+    <p>It is worth saying where the line runs, because a neighbouring netspec issue sits
+    on the other side of it and is deliberately not on this page.
+    <a href="https://github.com/heibench/netspec/issues/26">netspec#26</a> carries an
+    environment fault in the exit code but not as a report field &mdash; an omission, and
+    nothing it says is false. But omission is not the line, because case 3 is a pure
+    failure to say something and is on this record. The line is whether the channel can be
+    <strong>silenced</strong>, which is #26's own argument: case 3's only signal was a log
+    line, and an application setting its root logger to <code>ERROR</code> removed it
+    entirely, leaving nothing at all; #26's channel is an exit code, which no caller's
+    configuration can turn off. #35 needs neither test &mdash; it held the right answer
+    and stated a wrong one.</p>
+  </div>
+
+  <div class="case">
+    <h3>14. An engine that is installed reads as absent, and every engine test skips
+      <span class="tag open">open</span></h3>
+    <p class="meta">prusaslicer-py &middot;
+      <code>prusaslicer_py/slicer.py:412</code>, <code>tests/conftest.py</code> &middot;
+      <a href="https://github.com/heibench/prusaslicer-py/issues/35">prusaslicer-py#35</a>
+      &middot; read from source 2026-09-06, re-read on <code>00cd43c</code></p>
+    <p><code>_find_executable</code> is <code>shutil.which(cls._exec_name())</code> and
+    nothing else, and <code>_exec_name()</code> answers <code>prusa-slicer</code> on every
+    non-Windows platform. The Homebrew cask installs
+    <code>/Applications/PrusaSlicer.app</code>, whose binary carries the
+    <em>application's</em> name &mdash; <code>PrusaSlicer</code> &mdash; and puts nothing
+    on <code>PATH</code>. Discovery reports the engine absent on a machine that has it.</p>
+    <p>The second-order effect is the worse half, and it is why this is
+    <strong>fabricate</strong> rather than misroute. conftest decides whether to skip an
+    engine test by constructing <code>PrusaSlicer()</code> and catching
+    <code>FileNotFoundError</code>; on a cask install that raises, so every engine test
+    skips on the one machine that could have run them. That is §2.4's <em>a skipped test
+    is not a passing test</em>, and the same shape as partspec's
+    <strong>195 passed / 23 skipped</strong> with no OpenSCAD on any runner.</p>
+    <p><strong>Whose green it is, precisely.</strong> Not prusaslicer-py's own CI:
+    <code>engine.yml</code>'s macOS job symlinks the bundle's binary onto
+    <code>/usr/local/bin/prusa-slicer</code> and runs under
+    <code>PRUSASLICER_PY_REQUIRE_ENGINE</code>, so a skip there is a hard failure. It is a
+    <em>user</em> on a cask install who gets the green that verified nothing, and a
+    workflow step is what stands between the two.</p>
+    <p><strong>Not reproduced here</strong>, and recorded as case 2 is: there is no macOS
+    host on this bench, so what is read from source is the discovery path and the skip
+    cascade. What makes it more than a code reading is that the discovery miss was
+    observed on a real macOS runner by a sibling project's engine matrix, immediately
+    after Homebrew installed the engine. slicelab fixed its <em>own</em> discovery for it
+    in <code>17f539f</code> &mdash; per-platform candidates, because which name a bundle
+    uses is a packaging decision &mdash; and reported the same shape across. This
+    repository still has the single name.</p>
+    <p>The repository already knows the bundle layout &mdash; <code>slicer.py</code>
+    handles <code>.app</code> when locating <em>shapes</em> resources, commenting that
+    looking only beside the binary broke
+    <code>brew install --cask prusaslicer</code>. The shape is understood for resources
+    and not for discovery. Against case 11 it is the same module in the opposite
+    direction: 11 is an engine found but unusable, this is an engine present but not
+    found, and both are discovery answering with more confidence than it established.</p>
   </div>
 
   <h2>What the record is for</h2>
