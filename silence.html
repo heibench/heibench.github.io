@@ -51,10 +51,10 @@
 
   <h2>How often it is violated is the point</h2>
 
-  <p>As of 2026-09-10 this exact defect — no state for <em>could not tell</em>,
+  <p>As of 2026-09-12 this exact defect — no state for <em>could not tell</em>,
   defaulting to green, to a wrong verdict, or to a signal the caller cannot read —
-  has been recorded <strong>fourteen times</strong>, across <strong>five unrelated
-  domains</strong>, written at different times by the same author. <strong>Twelve are
+  has been recorded <strong>fifteen times</strong>, across <strong>five unrelated
+  domains</strong>, written at different times by the same author. <strong>Thirteen are
   fixed, one is accepted, one is open.</strong></p>
 
   <p><strong>Three states, because two could not carry the answer.</strong>
@@ -96,6 +96,7 @@
       <tr><td>12</td><td>prusaslicer-py — a preamble line returned as the version</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>13</td><td>netspec — a real failure blamed on an invented cause</td><td>verify</td><td><span class="tag resolved">resolved</span></td></tr>
       <tr><td>14</td><td>prusaslicer-py — an installed macOS engine reads as absent</td><td>drive</td><td><span class="tag open">open</span></td></tr>
+    <tr><td>15</td><td>prusaslicer-py &mdash; an example reports its own failure and exits 0</td><td>drive</td><td><span class="tag resolved">resolved</span></td></tr>
     </tbody>
   </table>
   </div>
@@ -502,6 +503,59 @@ other APIs changed; see the migration guide at ... or pin 'mcp&lt;2' ...</code><
     and not for discovery. Against case 11 it is the same module in the opposite
     direction: 11 is an engine found but unusable, this is an engine present but not
     found, and both are discovery answering with more confidence than it established.</p>
+  </div>
+
+
+  <div class="case">
+    <h3>15. A driver's own example reports its failure and exits 0
+      <span class="tag resolved">resolved</span></h3>
+    <p class="meta">prusaslicer-py &middot;
+      <code>examples/torus_example_attempt.py</code>,
+      <code>examples/basic_slicing.py</code> &middot;
+      <a href="https://github.com/heibench/prusaslicer-py/issues/36">prusaslicer-py#36</a>
+      &middot; reproduced 2026-09-11 &middot; fixed in
+      <a href="https://github.com/heibench/prusaslicer-py/commit/389eed8">389eed8</a>,
+      2026-09-12</p>
+    <p><strong>Resolved:</strong> both examples exit non-zero when they produce no
+    G-code and when the shape they need is absent. All four exit sites are covered by
+    tests that run the examples as real processes and assert the status &mdash; asserting
+    it in-process is exactly what would not have caught this.</p>
+    <p>The example passed <code>layer_height</code> to <code>additional_args</code>, which
+    builds <code>--{key}</code> verbatim, so the engine answered
+    <code>Unknown option --layer_height</code> and produced nothing. The example caught
+    the error, printed it, and ended:</p>
+    <pre><code>$ python examples/torus_example_attempt.py
+No G-code produced: PrusaSlicer exited 1 slicing .../torus.stl
+Unknown option --layer_height
+$ echo $?
+0</code></pre>
+    <p><strong>The library was scrupulously correct throughout.</strong>
+    <code>slice_model</code> raised <code>SliceError</code> carrying the engine's
+    <code>returncode</code>, <code>stdout</code> and <code>stderr</code>, exactly as its
+    D5 promises. Nothing was silenced by <code>prusaslicer_py</code>; the example dropped
+    the answer. That is why this case is here rather than filed against the driver: an
+    honest library does not save a caller who discards what it returns, and the file
+    doing the discarding was the one whose job is to demonstrate the library working.</p>
+    <p><strong>Both channels were not wrong &mdash; only the machine-readable one.</strong>
+    The message is printed and accurate. A person running the example sees the failure;
+    a smoke test reading <code>$?</code> sees success. This page's own opening is the
+    argument for counting it: a person catches a bad render by glancing at it, and a
+    script does not glance.</p>
+    <p>Two things from the fix generalise. <strong>The obvious repair was wrong:</strong>
+    only <code>layer_height</code> becomes a real option by swapping the underscore
+    &mdash; there is no <code>--infill-density</code> (it is <code>--fill-density</code>),
+    no <code>--print-speed</code> (speeds are per-feature) and no
+    <code>--extruder-temperature</code> (it is <code>--temperature</code>), so a
+    mechanical <code>_</code>&rarr;<code>-</code> pass would have left the example broken
+    while looking repaired. And <strong>two of the four demo values were the engine's own
+    defaults</strong>, so checking that a value "came back" could not distinguish the
+    option taking effect from it never being passed.</p>
+    <p>The examples are not run in CI, so the harm was to a person or an ad-hoc smoke
+    test rather than a green pipeline. It became reachable only when an earlier fix
+    removed an outer failure: until the driver stopped naming a Windows executable, the
+    examples died earlier on Linux and never reached the engine. <strong>Removing an
+    outer failure exposes an inner one, and a repository with no example smoke test does
+    not find out.</strong></p>
   </div>
 
   <h2>What the record is for</h2>
