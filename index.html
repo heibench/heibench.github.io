@@ -51,14 +51,14 @@
 
   <h3>Drive</h3>
   <p>Put the engine under program control: headless, scriptable, version-aware,
-  deterministic.</p>
+  deterministic. A driver may write a design, as long as the engine judges the result.</p>
 
   <div class="scroll">
   <table>
     <thead><tr><th>Tool</th><th>Engine</th></tr></thead>
     <tbody>
       <tr>
-        <td><a href="https://github.com/heibench/orlab">orlab</a></td>
+        <td><a href="https://github.com/heibench/orlab">orlab</a> · <a href="/orlab/">docs</a></td>
         <td>OpenRocket, via JPype — load <code>.ork</code>, run simulations, extract
         time series and flight events</td>
       </tr>
@@ -72,6 +72,12 @@
         <td>PrusaSlicer and OrcaSlicer — declare a small configuration delta, and get back
         G-code plus a lock recording exactly what the engine resolved.
         <em>Pre-alpha: the contract and its decisions, no verb implemented yet.</em></td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/heibench/boardwright">boardwright</a> · <a href="/boardwright/">docs</a></td>
+        <td>KiCad, via <code>kicad-cli</code> and its IPC API — generate a board from a short
+        Python description, or edit an existing board or schematic in place, and report
+        success only when KiCad's own ERC, DRC and netlist agree</td>
       </tr>
     </tbody>
   </table>
@@ -95,7 +101,7 @@
         <td><code>kicad-cli</code></td>
       </tr>
       <tr>
-        <td><a href="https://github.com/heibench/gerberdiff">gerberdiff</a></td>
+        <td><a href="https://github.com/heibench/gerberdiff">gerberdiff</a> · <a href="/gerberdiff/">docs</a></td>
         <td>fabrication output (Gerber / Excellon)</td>
         <td>the fabrication files themselves</td>
       </tr>
@@ -126,10 +132,12 @@
 
   <h2>What does not</h2>
 
-  <p>Authoring and design generation, language runtimes, slicer post-processing,
-  dependency management, and machine control at runtime are all out of scope.
-  heibench is the design-time middle: <strong>operate the tool, and know whether to
-  believe the output.</strong></p>
+  <p>Design generation that no engine checks — a language or generator whose output
+  is trusted on its own say-so — is out of scope, and so are language runtimes, slicer
+  post-processing, dependency management, and machine control at runtime. Authoring
+  belongs only as a driver: it writes through the engine, and the engine decides whether
+  the result stands. heibench is the design-time middle: <strong>operate the tool, and
+  know whether to believe the output.</strong></p>
 
   <h2>The contract</h2>
 

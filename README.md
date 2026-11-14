@@ -9,6 +9,7 @@ is the deploy.
     silence.html          the core rule, and the recorded instances of the defect
     adjudications.html    open conflicts between shipped members
     assets/site.css       the whole stylesheet
+    assets/docs.css       the heibench colours for the projects' MkDocs sites
     assets/mark.svg       the org mark; generated in the .github repo
 
 ## What is canonical here

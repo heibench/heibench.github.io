@@ -1,0 +1,31 @@
+/* The heibench look for the project documentation sites (MkDocs Material).
+ *
+ * Each project's mkdocs.yml sets `primary: custom` and `accent: custom` and
+ * loads this file from https://heibench.com/assets/docs.css, so the colours
+ * live here once, beside site.css, and match heibench.com. */
+
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #0b3a75;
+  --md-primary-fg-color--light: #2d5c97;
+  --md-primary-fg-color--dark: #072852;
+  --md-primary-bg-color: #ffffff;
+  --md-accent-fg-color: #2d5c97;
+  --md-typeset-a-color: #0b3a75;
+  --md-default-bg-color: #fbfaf8;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #0b3a75;
+  --md-primary-fg-color--light: #2d5c97;
+  --md-primary-fg-color--dark: #072852;
+  --md-primary-bg-color: #e7e9ec;
+  --md-accent-fg-color: #7ea8dd;
+  --md-typeset-a-color: #7ea8dd;
+  --md-default-bg-color: #12151a;
+}
+
+/* The org mark sits on a white tile; keep it square-cornered to the header. */
+.md-header__button.md-logo img {
+  height: 1.6rem;
+  width: 1.6rem;
+}
