@@ -56,10 +56,13 @@
   record, not an omission to fix.</strong></p>
 
   <h3>Exit codes</h3>
-  <p>Agreed across partspec and netspec today:</p>
+  <p>Agreed across partspec, netspec, gerberdiff and boardwright; zotgo and wikisync
+  differ (A5, A6):</p>
 <pre><code>0    satisfied
 1    violated
-4    environment fault / error — not a verdict on the design</code></pre>
+2    could not tell — not a finding
+4    environment fault — not a verdict either
+64   usage (EX_USAGE)</code></pre>
 
   <h2>The adjudications</h2>
 
@@ -145,6 +148,34 @@
     fallback. Retained as <a href="/silence.html">case 3</a> in the record, where it is
     the first instance found in the <strong>drive</strong> layer rather than the verify
     layer.</p>
+  </div>
+
+  <div class="case">
+    <h3>A5 — wikisync uses <code>2</code> for usage, and an unreachable wiki exits <code>1</code>
+      <span class="tag open">open</span></h3>
+    <p class="meta">measured 2026-11-15 on <code>459d89c</code> (0.5.1) ·
+      <a href="https://github.com/heibench/wikisync/issues/66">wikisync#66</a></p>
+    <p>wikisync joined on 2026-11-15 with its own documented codes. <code>wikisync
+    --no-such-flag</code> exits <code>2</code>, where partspec, netspec, gerberdiff and
+    boardwright mean <em>could not tell</em>. <code>wikisync pull --host 127.0.0.1:9 "Main Page"</code>, with
+    nothing listening, exits <code>1</code>, the same code as a push refused for an edit
+    conflict. A caller branching on <code>1</code> cannot tell a finding about the
+    edit from a wiki it never reached.</p>
+  </div>
+
+  <div class="case">
+    <h3>A6 — zotgo exits <code>1</code> for usage and for an unreachable Zotero, and <code>3</code> for an unknown command
+      <span class="tag open">open</span></h3>
+    <p class="meta">measured 2026-11-15 on <code>766aab3</code> (after 1.0.0-rc.1) ·
+      <a href="https://github.com/heibench/zotgo/issues/144">zotgo#144</a></p>
+    <p>zotgo joined on 2026-11-15 with no documented exit table. A bad flag exits
+    <code>1</code>; a Zotero that is not running exits <code>1</code>
+    (<code>ZOTGO_BASE_URL=http://127.0.0.1:9 zot doctor</code>); an unknown command
+    exits <code>3</code>, from urfave/cli's help path, which is the code partspec and
+    slicelab use for <em>empty</em>. There is no code for <em>could not tell</em>.</p>
+    <p>A5 and A6 are being decided together: conform both to the table above, or revise
+    the table if the two drivers show it is wrong for tools whose engine is a service
+    rather than a local binary. Either way it is a decision entry before a release.</p>
   </div>
 
   <h2>The rule that produced them</h2>
