@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>heibench — drive the engine, check the result</title>
-<meta name="description" content="Hardware Engineering Integration bench: put engineering engines under program control, and adjudicate what they produce against declared intent.">
+<meta name="description" content="Open tools for scientific and technical workflows: put the engines of technical work under program control, and adjudicate what they produce against declared intent.">
 <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml">
 <link rel="alternate icon" href="/assets/favicon.ico" sizes="any">
 <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -27,12 +27,12 @@
 
 <main class="wrap">
 
-  <h1>Hardware Engineering Integration bench</h1>
+  <h1>Open tools for scientific and technical workflows</h1>
   <p class="tagline">Drive the engine. Check the result.</p>
 
-  <p class="lead">Engineering engines — OpenRocket, PrusaSlicer, KiCad, OpenSCAD, OCCT — are
-  built for a person sitting at a GUI. Two things follow, and the second is the one
-  that bites.</p>
+  <p class="lead">The engines of technical work — OpenRocket, PrusaSlicer, KiCad,
+  OpenSCAD, OCCT, Zotero, MediaWiki — are built for a person sitting at a GUI or a
+  browser. Two things follow, and the second is the one that bites.</p>
 
   <p>A program cannot drive them well. Every one has a CLI or a binding, and every one
   of those is version-skewed, undocumented in places, and shaped around a human who
@@ -44,8 +44,10 @@
   is indistinguishable from a tool that worked, and everything downstream inherits
   the mistake.</p>
 
-  <p>heibench does those two things and nothing else: it puts engineering engines under
-  program control, and it adjudicates what they produce against declared intent.</p>
+  <p>heibench does those two things and nothing else: it puts those engines under
+  program control, and it adjudicates what they produce against declared intent. An
+  engine is whatever owns the truth about the artifact — a CAD kernel, a slicer, KiCad,
+  a reference library, a wiki's revision history.</p>
 
   <h2>The two layers</h2>
 
@@ -78,6 +80,18 @@
         <td>KiCad, via <code>kicad-cli</code> and its IPC API — generate a board from a short
         Python description, or edit an existing board or schematic in place, and report
         success only when KiCad's own ERC, DRC and netlist agree</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/heibench/zotgo">zotgo</a> · <a href="/zotgo/">docs</a></td>
+        <td>Zotero 7+, via its HTTP Local API and the Web API — search, read and export a
+        library, and write through Zotero's own local write API, with a <code>doctor</code>
+        that reports what the endpoint can actually do</td>
+      </tr>
+      <tr>
+        <td><a href="https://github.com/heibench/wikisync">wikisync</a> · <a href="/wikisync/">docs</a></td>
+        <td>MediaWiki, via its JSON API — pull pages as local wikitext, diff against the
+        pulled baseline, and push back with the wiki's own conflict detection; previews
+        by default and never deletes</td>
       </tr>
     </tbody>
   </table>
@@ -114,14 +128,17 @@
 
   <h2>What belongs here</h2>
 
-  <p>A tool belongs if <strong>both</strong> hold:</p>
+  <p>A tool belongs if <strong>all three</strong> hold:</p>
 
   <ol>
-    <li>It puts an engineering engine or artifact under <strong>program control</strong> —
-    headless, scriptable, deterministic, no human in the loop.</li>
+    <li>It puts a scientific or technical engine, service or artifact under
+    <strong>program control</strong> — headless, scriptable, deterministic, no human in
+    the loop.</li>
     <li>It is <strong>honest about what it established</strong> — a structured result, a
     meaningful exit code, never reporting success it did not verify and never
     substituting a plausible result for a real one.</li>
+    <li>It is <strong>useful beyond one project</strong> — someone who has never seen the
+    work it came from can pick it up and use it.</li>
   </ol>
 
   <p>The second is not a quality preference. It is the condition that makes the first
@@ -132,12 +149,20 @@
 
   <h2>What does not</h2>
 
-  <p>Design generation that no engine checks — a language or generator whose output
-  is trusted on its own say-so — is out of scope, and so are language runtimes, slicer
+  <p>Generation that no engine checks — a language or generator whose output is
+  trusted on its own say-so — is out of scope, and so are language runtimes, slicer
   post-processing, dependency management, and machine control at runtime. Authoring
   belongs only as a driver: it writes through the engine, and the engine decides whether
-  the result stands. heibench is the design-time middle: <strong>operate the tool, and
-  know whether to believe the output.</strong></p>
+  the result stands. Nor is heibench a framework or a general collection of
+  repositories. heibench is the middle: <strong>operate the tool, and know whether to
+  believe the output.</strong></p>
+
+  <h2>The name</h2>
+
+  <p>heibench was founded on 2026-09-05 as the <em>Hardware Engineering Integration
+  bench</em>, when every member drove an engineering engine. On 2026-11-15 the scope
+  widened to open tools for scientific and technical work, with zotgo and wikisync the
+  first members outside hardware. The name stayed; the expansion was retired.</p>
 
   <h2>The contract</h2>
 
