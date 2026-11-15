@@ -153,20 +153,20 @@
   <div class="case">
     <h3>A5 — wikisync uses <code>2</code> for usage, and an unreachable wiki exits <code>1</code>
       <span class="tag open">open</span></h3>
-    <p class="meta">measured 2026-11-15 on <code>450965e</code> ·
+    <p class="meta">measured 2026-11-15 on <code>459d89c</code> (0.5.1) ·
       <a href="https://github.com/heibench/wikisync/issues/66">wikisync#66</a></p>
     <p>wikisync joined on 2026-11-15 with its own documented codes. <code>wikisync
-    --no-such-flag</code> exits <code>2</code>, where every other member means <em>could
-    not tell</em>. <code>wikisync pull --host 127.0.0.1:9 "Main Page"</code>, with
-    nothing listening, exits <code>1</code>, the same code as a push the wiki refused
-    for a conflict. A caller branching on <code>1</code> cannot tell a finding about the
+    --no-such-flag</code> exits <code>2</code>, where partspec, netspec, gerberdiff and
+    boardwright mean <em>could not tell</em>. <code>wikisync pull --host 127.0.0.1:9 "Main Page"</code>, with
+    nothing listening, exits <code>1</code>, the same code as a push refused for an edit
+    conflict. A caller branching on <code>1</code> cannot tell a finding about the
     edit from a wiki it never reached.</p>
   </div>
 
   <div class="case">
     <h3>A6 — zotgo exits <code>1</code> for usage and for an unreachable Zotero, and <code>3</code> for an unknown command
       <span class="tag open">open</span></h3>
-    <p class="meta">measured 2026-11-15 on <code>c4c5371</code> ·
+    <p class="meta">measured 2026-11-15 on <code>766aab3</code> (after 1.0.0-rc.1) ·
       <a href="https://github.com/heibench/zotgo/issues/144">zotgo#144</a></p>
     <p>zotgo joined on 2026-11-15 with no documented exit table. A bad flag exits
     <code>1</code>; a Zotero that is not running exits <code>1</code>
