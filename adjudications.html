@@ -173,9 +173,15 @@
     (<code>ZOTGO_BASE_URL=http://127.0.0.1:9 zot doctor</code>); an unknown command
     exits <code>3</code>, from urfave/cli's help path, which is the code partspec and
     slicelab use for <em>empty</em>. There is no code for <em>could not tell</em>.</p>
-    <p>A5 and A6 are being decided together: conform both to the table above, or revise
-    the table if the two drivers show it is wrong for tools whose engine is a service
-    rather than a local binary. Either way it is a decision entry before a release.</p>
+    <p><strong>Decided 2026-11-15, for A5 and A6 together: conform.</strong> Every
+    divergence measured is a case the table already names. Usage becomes
+    <code>64</code>. A service that is down or unreachable, or credentials that are
+    absent, becomes <code>4</code>: the engine that will not start, with a service in
+    the engine's place. <code>1</code> stays the service refusing this request. The
+    table gains no code. Each stays open until its tool ships the change, wikisync as
+    0.7.0 and zotgo before 1.0; the full mapping is on
+    <a href="https://github.com/heibench/wikisync/issues/66">wikisync#66</a> and
+    <a href="https://github.com/heibench/zotgo/issues/144">zotgo#144</a>.</p>
   </div>
 
   <h2>The rule that produced them</h2>
