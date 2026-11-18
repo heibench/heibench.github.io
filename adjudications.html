@@ -56,8 +56,8 @@
   record, not an omission to fix.</strong></p>
 
   <h3>Exit codes</h3>
-  <p>Agreed across partspec, netspec, gerberdiff and boardwright; zotgo and wikisync
-  differ (A5, A6):</p>
+  <p>Agreed across partspec, netspec, gerberdiff and boardwright; zotgo, wikisync and
+  orlab differ (A5, A6, A7):</p>
 <pre><code>0    satisfied
 1    violated
 2    could not tell — not a finding
@@ -182,6 +182,26 @@
     0.7.0 and zotgo before 1.0; the full mapping is on
     <a href="https://github.com/heibench/wikisync/issues/66">wikisync#66</a> and
     <a href="https://github.com/heibench/zotgo/issues/144">zotgo#144</a>.</p>
+  </div>
+
+  <div class="case">
+    <h3>A7 — orlab's <code>fetch</code> exits <code>1</code> on any error, and usage exits <code>2</code>
+      <span class="tag open">open</span></h3>
+    <p class="meta">measured 2026-11-18 on <code>4c147c1</code> ·
+      <a href="https://github.com/heibench/orlab/issues/88">orlab#88</a></p>
+    <p><code>python -m orlab --no-such-flag</code> exits <code>2</code>, from argparse,
+    where partspec, netspec, gerberdiff and boardwright mean <em>could not tell</em>.
+    <code>python -m orlab fetch 0.0.1</code>, a version with no pinned digest and no
+    <code>--sha256</code>, exits <code>1</code>; so do a network failure and a digest
+    mismatch, which go through the same handler and were not run. <code>which</code>
+    already moved to <code>4</code> in <code>cec7e6a</code>
+    (<a href="https://github.com/heibench/orlab/issues/87">orlab#87</a>).</p>
+    <p><strong>Decided 2026-11-18: conform.</strong> A network failure or a digest
+    mismatch is an environment fault, <code>4</code>. A usage error is
+    <code>64</code>, and so is asking <code>fetch</code> for an unpinned version
+    without <code>--sha256</code>: the invocation is missing something. The table
+    gains no code. It stays open until orlab ships the change on
+    <a href="https://github.com/heibench/orlab/issues/88">orlab#88</a>.</p>
   </div>
 
   <h2>The rule that produced them</h2>
